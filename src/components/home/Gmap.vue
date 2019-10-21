@@ -6,12 +6,13 @@
 	</div>
 </template>
 <script type="text/javascript">
+	import firebase from "firebase"
 	export default {
 		name: 'Gmap',
 		data(){
 			return {
-				lat: -25.344,
-				lng: 131.036
+				lat: 52,
+				lng: 89
 			}
 		},
 		methods:{
@@ -29,7 +30,18 @@
 			}
 		},
 		mounted(){
-			this.renderMap();
+
+			if (navigator.geolocation) {
+				
+    			navigator.geolocation.getCurrentPosition( position => {
+      			
+      		this.lat = position.coords.latitude
+      		this.lng = position.coords.longitude
+      		this.renderMap();
+    });
+  }
+			
+			// console.log(firebase.auth().currentUser)
 		}
 	}
 </script>

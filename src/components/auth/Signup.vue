@@ -31,6 +31,7 @@
 	</div>
 </template>
 <script type="text/javascript">
+	import firebase from "firebase"
 	import slugify from "slugify";
 	import db from "@/firebase/init";
 	export default{
@@ -47,15 +48,38 @@
 		},
 		methods:{
 			signUp(){
-				if(this.alias){
+				if(this.alias && this.email && this.password){
 					this.slug = slugify(this.alias, {
 						replacement: "-",
 						remove: /[$*_+~.()'"!\-:@]/g,
 						lower: true
 					})
+					let ref = db.collection('users').doc(this.slug);
+					ref.get().then(doc => {
+						if(doc.exists){
+							this.feedback = "This alias already exists"
+						}else{
+							firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+							.then(cred=>{
+								
+								ref.set({
+									alias: this.alias,
+									geolocation: null,
+									user_id: cred.user.uid
+								})
+							})
+							.then(()=>{
+								this.$router.push({name: 'home'})
+							})
+							.catch(err=>{
+								console.log(err);
+								this.feedback = err.message
+							})
+						}
+					})
 					console.log(this.slug);
 				}else{
-					this.feedback = "You need to enter an alias"
+					this.feedback = "You need to enter all fields"
 				}
 			}
 		}
