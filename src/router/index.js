@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Signup from '@/components/auth/Signup.vue'
 import Login from '@/components/auth/Login.vue'
+import firebase from 'firebase'
 
 Vue.use(VueRouter)
 
@@ -10,7 +11,10 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: Home,
+    meta: {
+     requiresAuth: true 
+    }
   },
   {
     path: '/login',
@@ -31,6 +35,22 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   }
 ]
+
+routes.beforeEach((to, from, next) => {
+
+  if (to.matched.some(rec => rec.meta.requiresAuth)){
+    //check if user is authenticated
+    let user = firebase.auth().currentUser;
+    if(user){
+      next('')
+    }else{
+      next({
+        name: 'Login'
+      })
+    }
+  }
+  else next()
+})
 
 const router = new VueRouter({
   mode: 'history',
