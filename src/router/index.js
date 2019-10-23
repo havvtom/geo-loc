@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Signup from '@/components/auth/Signup.vue'
 import Login from '@/components/auth/Login.vue'
+import ViewProfile from '@/components/profile/ViewProfile.vue'
 import firebase from 'firebase'
 
 Vue.use(VueRouter)
@@ -27,6 +28,14 @@ const routes = [
     component: Signup
   },
   {
+    path: '/profile/:id',
+    name: 'ViewProfile',
+    component: ViewProfile,
+    meta: {
+     requiresAuth: true 
+    }
+  },
+  {
     path: '/about',
     name: 'about',
     // route level code-splitting
@@ -36,13 +45,19 @@ const routes = [
   }
 ]
 
-routes.beforeEach((to, from, next) => {
+const router = new VueRouter({
+  // mode: 'history',
+  // base: process.env.BASE_URL,
+  routes
+})
+
+router.beforeEach((to, from, next) => {
 
   if (to.matched.some(rec => rec.meta.requiresAuth)){
     //check if user is authenticated
     let user = firebase.auth().currentUser;
     if(user){
-      next('')
+      next()
     }else{
       next({
         name: 'Login'
@@ -52,10 +67,5 @@ routes.beforeEach((to, from, next) => {
   else next()
 })
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-})
 
 export default router
